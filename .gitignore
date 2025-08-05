@@ -43,9 +43,3 @@ yarn-error.log*
 
 # Prisma
 prisma/.env
-
-# Taskmaster (optional - remove if you want to track tasks)
-.taskmaster/state.json
-.taskmaster/tasks/tasks.json
-
-.cursor/mcp.json
