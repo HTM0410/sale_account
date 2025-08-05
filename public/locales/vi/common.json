@@ -1,0 +1,76 @@
+{
+  "site": {
+    "title": "Premium Account Marketplace",
+    "description": "Nền tảng bán tài khoản premium uy tín tại Việt Nam"
+  },
+  "navigation": {
+    "home": "Trang chủ",
+    "products": "Sản phẩm",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "dashboard": "Bảng điều khiển",
+    "orders": "Đơn hàng",
+    "logout": "Đăng xuất"
+  },
+  "buttons": {
+    "buy_now": "Mua ngay",
+    "add_to_cart": "Thêm vào giỏ",
+    "checkout": "Thanh toán",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "save": "Lưu",
+    "edit": "Chỉnh sửa",
+    "delete": "Xóa",
+    "view_details": "Xem chi tiết"
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Có lỗi xảy ra",
+    "success": "Thành công",
+    "warning": "Cảnh báo",
+    "info": "Thông tin",
+    "confirm_delete": "Bạn có chắc chắn muốn xóa?",
+    "no_data": "Không có dữ liệu",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "price": "Giá",
+    "currency": "VNĐ"
+  },
+  "products": {
+    "title": "Sản phẩm",
+    "categories": {
+      "streaming": "Streaming & Giải trí",
+      "productivity": "Năng suất",
+      "education": "Giáo dục",
+      "cloud_storage": "Lưu trữ đám mây",
+      "design": "Thiết kế",
+      "development": "Phát triển phần mềm"
+    },
+    "popular_products": "Sản phẩm phổ biến",
+    "new_arrivals": "Hàng mới về",
+    "on_sale": "Đang giảm giá",
+    "stock_status": {
+      "in_stock": "Còn hàng",
+      "out_of_stock": "Hết hàng",
+      "limited": "Số lượng có hạn"
+    }
+  },
+  "footer": {
+    "copyright": "© 2024 Premium Account Marketplace. Tất cả quyền được bảo lưu.",
+    "contact": "Liên hệ",
+    "privacy": "Chính sách bảo mật",
+    "terms": "Điều khoản sử dụng",
+    "support": "Hỗ trợ"
+  },
+  "auth": {
+    "login_title": "Đăng nhập",
+    "register_title": "Đăng ký",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "confirm_password": "Xác nhận mật khẩu",
+    "forgot_password": "Quên mật khẩu?",
+    "remember_me": "Ghi nhớ đăng nhập",
+    "no_account": "Chưa có tài khoản?",
+    "already_have_account": "Đã có tài khoản?"
+  }
+}
