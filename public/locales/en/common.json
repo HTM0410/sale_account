@@ -1,0 +1,76 @@
+{
+  "site": {
+    "title": "Premium Account Marketplace",
+    "description": "Trusted premium account marketplace in Vietnam"
+  },
+  "navigation": {
+    "home": "Home",
+    "products": "Products",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "orders": "Orders",
+    "logout": "Logout"
+  },
+  "buttons": {
+    "buy_now": "Buy Now",
+    "add_to_cart": "Add to Cart",
+    "checkout": "Checkout",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view_details": "View Details"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "confirm_delete": "Are you sure you want to delete?",
+    "no_data": "No data available",
+    "search": "Search",
+    "filter": "Filter",
+    "price": "Price",
+    "currency": "VND"
+  },
+  "products": {
+    "title": "Products",
+    "categories": {
+      "streaming": "Streaming & Entertainment",
+      "productivity": "Productivity",
+      "education": "Education",
+      "cloud_storage": "Cloud Storage",
+      "design": "Design",
+      "development": "Software Development"
+    },
+    "popular_products": "Popular Products",
+    "new_arrivals": "New Arrivals",
+    "on_sale": "On Sale",
+    "stock_status": {
+      "in_stock": "In Stock",
+      "out_of_stock": "Out of Stock",
+      "limited": "Limited Stock"
+    }
+  },
+  "footer": {
+    "copyright": "© 2024 Premium Account Marketplace. All rights reserved.",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "support": "Support"
+  },
+  "auth": {
+    "login_title": "Login",
+    "register_title": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "forgot_password": "Forgot Password?",
+    "remember_me": "Remember Me",
+    "no_account": "Don't have an account?",
+    "already_have_account": "Already have an account?"
+  }
+}
