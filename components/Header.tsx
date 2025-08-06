@@ -1,10 +1,12 @@
 'use client'
 
 import { useSession, signOut } from 'next-auth/react'
+import { useCartStore } from '@/lib/stores/cartStore'
 import Link from 'next/link'
 
 export default function Header() {
   const { data: session, status } = useSession()
+  const { totalItems } = useCartStore()
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/' })
@@ -33,6 +35,24 @@ export default function Header() {
                 className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
               >
                 Sản phẩm
+              </Link>
+              
+              {/* Cart Icon */}
+              <Link 
+                href="/cart"
+                className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium relative"
+              >
+                <div className="flex items-center space-x-1">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6.5M13 13l1.5 6.5M9 19.5h.01M15 19.5h.01" />
+                  </svg>
+                  <span className="hidden sm:inline">Giỏ hàng</span>
+                  {totalItems() > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                      {totalItems() > 99 ? '99+' : totalItems()}
+                    </span>
+                  )}
+                </div>
               </Link>
               
               {status === 'loading' ? (

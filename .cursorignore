@@ -1,0 +1,7 @@
+# Remove .env from Cursor ignore so we can edit it
+# (but keep it in .gitignore for security)
+!.env
+!.env.local
+# Still ignore these sensitive files
+.env.production.local
+.env.test.local

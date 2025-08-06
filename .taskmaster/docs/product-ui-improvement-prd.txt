@@ -1,0 +1,57 @@
+# PRD: Cải tiến giao diện sản phẩm cho hệ thống bán tài khoản Premium
+
+## Tổng quan
+Cải tiến UI/UX cho trang hiển thị sản phẩm và trang chi tiết sản phẩm để hiển thị thông tin một cách trực quan và rõ ràng hơn.
+
+## Yêu cầu chức năng
+
+### 1. Cải tiến trang danh sách sản phẩm (/products)
+- Hiển thị tên sản phẩm chính (ví dụ: "YouTube Premium", "Netflix Premium") mà không hiển thị số tháng
+- Hiển thị giá thấp nhất của sản phẩm (từ các gói có sẵn)
+- Giữ nguyên các tính năng lọc và tìm kiếm hiện tại
+- UI/UX clean và professional
+
+### 2. Cải tiến trang chi tiết sản phẩm (/products/[id])
+- Hiển thị thông tin chi tiết sản phẩm
+- Hiển thị danh sách các gói khác nhau (1 tháng, 3 tháng, 6 tháng, 12 tháng...)
+- Mỗi gói hiển thị: thời hạn, giá tiền, mô tả ngắn
+- Nút "Thêm vào giỏ" cho từng gói cụ thể
+- Responsive design
+
+### 3. Cập nhật cấu trúc dữ liệu
+- Tạo model ProductPackage để lưu trữ các gói sản phẩm
+- Relationship: Product → hasMany → ProductPackage
+- ProductPackage fields: duration (số tháng), price, description, isActive
+- Migration để chuyển đổi dữ liệu hiện tại
+
+### 4. Cập nhật logic backend
+- API endpoint để lấy sản phẩm với giá thấp nhất
+- API endpoint để lấy chi tiết sản phẩm với tất cả packages
+- Cập nhật query logic trong Prisma
+
+### 5. Cập nhật components
+- Refactor ProductCard component
+- Tạo ProductPackageList component
+- Cập nhật AddToCartButton để support package selection
+- Responsive và accessibility
+
+## Yêu cầu kỹ thuật
+- Next.js 14 với App Router
+- Prisma ORM với PostgreSQL
+- TypeScript
+- Tailwind CSS
+- Tương thích mobile và desktop
+
+## Ưu tiên
+1. High: Tạo cấu trúc dữ liệu mới
+2. High: Cập nhật trang danh sách sản phẩm
+3. High: Cập nhật trang chi tiết sản phẩm  
+4. Medium: Testing và optimization
+5. Low: Advanced features
+
+## Timeline ước tính
+- Thiết kế database: 1 ngày
+- Backend development: 2 ngày  
+- Frontend development: 2-3 ngày
+- Testing và bug fix: 1 ngày
+- Total: 6-7 ngày
