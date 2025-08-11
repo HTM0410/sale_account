@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/db'
+import { encrypt, generateSecurePassword, generateUsername } from '@/lib/encryption'
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     // Handle the event
     switch (event.type) {
       case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object
+        const paymentIntent = event.data.object as any
         console.log(`PaymentIntent ${paymentIntent.id} succeeded`)
 
         // Update order status if needed
@@ -66,6 +67,84 @@ export async function POST(request: NextRequest) {
           console.log(`Order updated for PaymentIntent ${paymentIntent.id}`)
         } catch (error) {
           console.error('Failed to update order:', error)
+        }
+
+        // Auto deliver credentials if order exists and not delivered yet
+        try {
+          const order = await prisma.order.findFirst({
+            where: {
+              metadata: {
+                path: ['paymentIntentId'],
+                equals: paymentIntent.id
+              }
+            },
+            include: {
+              user: {
+                select: { id: true, email: true, name: true }
+              },
+              items: {
+                include: {
+                  product: { select: { name: true } },
+                  productPackage: { select: { duration: true, description: true } }
+                }
+              },
+              accountDelivery: true
+            }
+          })
+
+          if (order && !order.accountDelivery) {
+            const firstItem = order.items[0]
+            const productName = firstItem?.product?.name || 'Premium Account'
+            const durationMonths = firstItem?.productPackage?.duration || firstItem?.duration || 1
+            const expirationDate = new Date()
+            expirationDate.setMonth(expirationDate.getMonth() + durationMonths)
+
+            const username = generateUsername(productName)
+            const password = generateSecurePassword(16)
+            const productSlug = productName.toLowerCase().replace(/[^a-z0-9]/g, '')
+            const loginUrl = `https://accounts.${productSlug}.com` 
+            const notes = 'Đây là thông tin tài khoản tự động được cung cấp sau khi thanh toán thành công.'
+
+            const credentialsText = [
+              `Username: ${username}`,
+              `Password: ${password}`,
+              `Login URL: ${loginUrl}`,
+              `Expiration Date: ${expirationDate.toISOString().slice(0, 10)}`,
+              `Notes: ${notes}`
+            ].join('\n')
+
+            await prisma.accountDelivery.create({
+              data: {
+                orderId: order.id,
+                credentials: encrypt(credentialsText),
+                deliveryStatus: 'delivered',
+                deliveryNotes: 'Tự động giao qua Stripe webhook',
+                sentAt: new Date()
+              }
+            })
+
+            // Notify user
+            try {
+              await prisma.notification.create({
+                data: {
+                  userId: order.user.id || order.user.email || '',
+                  type: 'credential_delivered',
+                  message: `Tài khoản ${productName} của bạn đã được giao thành công.`,
+                  metadata: {
+                    orderId: order.id,
+                    productName: productName,
+                  },
+                  isRead: false
+                }
+              })
+            } catch (notificationError) {
+              console.error('Failed to create auto-delivery notification:', notificationError)
+            }
+
+            console.log(`Auto delivered credentials for order ${order.id}`)
+          }
+        } catch (deliveryError) {
+          console.error('Auto delivery error:', deliveryError)
         }
         break
       }

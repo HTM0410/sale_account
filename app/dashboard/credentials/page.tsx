@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import CredentialCard from '@/components/dashboard/CredentialCard'
 import { Metadata } from 'next'
@@ -148,7 +148,10 @@ export default async function CredentialsPage() {
         ) : (
           <div className="divide-y divide-gray-200">
             {orders.map((order) => (
-              <CredentialCard key={order.id} order={order} />
+              <CredentialCard
+                key={order.accountDelivery!.id}
+                deliveryId={order.accountDelivery!.id}
+              />
             ))}
           </div>
         )}

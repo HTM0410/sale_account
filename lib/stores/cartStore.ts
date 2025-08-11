@@ -31,7 +31,7 @@ type CartStore = {
   getItemCount: (productId: string, productPackageId?: string | null) => number
 }
 
-export const useCartStore = create<CartStore>(
+export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
@@ -112,14 +112,14 @@ export const createCartItem = (
       productId: product.id,
       productPackageId: productPackage.id,
       name: product.name,
-      description: productPackage.description,
+      description: productPackage.description ?? undefined,
       price: productPackage.price,
       duration: productPackage.duration,
       quantity,
       imageUrl: product.imageUrl,
       packageInfo: {
         duration: productPackage.duration,
-        description: productPackage.description,
+        description: productPackage.description ?? '',
         originalPrice: productPackage.price,
       }
     }

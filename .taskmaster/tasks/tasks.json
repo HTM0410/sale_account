@@ -137,8 +137,58 @@
           8,
           9
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Fix CredentialCard props in dashboard",
+            "description": "Correct the props being passed to CredentialCard component in the dashboard/credentials page, changing from passing order to deliveryId as required by the component.",
+            "dependencies": [],
+            "details": "1. Locate the dashboard/credentials page component\n2. Identify where CredentialCard is being rendered\n3. Update the component call to pass deliveryId instead of order object\n4. Ensure the correct data is being fetched from the database\n5. Update any related TypeScript interfaces if needed\n6. Test that credentials display correctly after the fix\n<info added on 2025-08-11T01:20:54.398Z>\nImplementation Plan for 10.1 (Fix CredentialCard props):\n\nFiles involved: `app/dashboard/credentials/page.tsx`, `components/dashboard/CredentialCard.tsx`\n\nIssue: `CredentialCard` requires prop `deliveryId: string` but the dashboard page is currently passing an `order` object.\n\nFix: Replace the rendering list from `<CredentialCard key={order.id} order={order} />` to `<CredentialCard key={order.id} deliveryId={order.accountDelivery!.id} />`. The data already includes `accountDelivery: true` and filters for `deliveryStatus: 'delivered'`, so the ID will always be available.\n\nOther impacts: No changes needed to `CredentialCard` component itself.\n\nTesting: Open `/dashboard/credentials` with a delivered order, verify the card displays correctly and successfully calls the API `/api/credentials/[id]`.\n</info added on 2025-08-11T01:20:54.398Z>\n<info added on 2025-08-11T01:29:25.217Z>\nImplementation Plan for 10.1 (Fix CredentialCard props):\n\nFiles involved: `app/dashboard/credentials/page.tsx`, `components/dashboard/CredentialCard.tsx`\n\nIssue: `CredentialCard` component requires prop `deliveryId: string` (as defined in CredentialCardProps interface), but the dashboard page is currently incorrectly passing an `order` object.\n\nFix details:\n- In `app/dashboard/credentials/page.tsx`, update the component rendering:\n  - From: `<CredentialCard key={order.id} order={order} />`\n  - To: `<CredentialCard key={order.accountDelivery.id} deliveryId={order.accountDelivery.id} />`\n\nData structure context:\n- The orders query already includes `{ accountDelivery: true }` and filters for `{ accountDelivery: { deliveryStatus: 'delivered' } }`\n- This ensures order.accountDelivery and its ID will always be available for delivered orders\n- The API endpoint `/api/credentials/[id]` expects the AccountDelivery.id as the parameter\n\nPotential risks:\n- While the Prisma schema might define accountDelivery as optional, our filter ensures only orders with deliveries are returned\n- The sentAt field could be null in the schema, which might affect date display in the UI (currently using `new Date(credential.sentAt)`)\n- This edge case isn't observed in delivered orders but could be addressed in future updates if needed\n\nTesting approach:\n- Run TypeScript and ESLint checks to verify type correctness\n- Test the dashboard/credentials page to confirm API calls to `/api/credentials/{deliveryId}` return correct data\n- Verify credential information displays properly in the UI\n</info added on 2025-08-11T01:29:25.217Z>",
+            "status": "done",
+            "testStrategy": "Verify credentials display correctly in the user dashboard after the fix by creating a test order and delivery, then checking the dashboard renders the credential card properly."
+          },
+          {
+            "id": 2,
+            "title": "Add Notification model to Prisma schema",
+            "description": "Create the missing Notification model in the Prisma schema to support the notification functionality that's already being used in the code.",
+            "dependencies": [],
+            "details": "1. Open the Prisma schema file (schema.prisma)\n2. Add the Notification model with fields:\n   - id: String @id @default(uuid())\n   - userId: String\n   - user: User @relation(fields: [userId], references: [id])\n   - type: String (e.g., 'credential_delivery')\n   - title: String\n   - message: String\n   - read: Boolean @default(false)\n   - createdAt: DateTime @default(now())\n   - data: Json? (for additional context)\n3. Add appropriate relations to User model\n4. Run prisma generate and prisma db push to update the database\n5. Update any existing notification code to use the new schema",
+            "status": "done",
+            "testStrategy": "Test notification creation and retrieval using the Prisma client in a test environment. Verify relations work correctly between users and notifications."
+          },
+          {
+            "id": 3,
+            "title": "Implement automated credential delivery in Stripe webhook",
+            "description": "Enhance the Stripe webhook handler to automatically deliver credentials when a payment is successful, using predefined templates.",
+            "dependencies": [
+              "10.2"
+            ],
+            "details": "1. Update the Stripe webhook handler in api/webhooks/stripe/route.ts\n2. For 'checkout.session.completed' events, check if the order status is 'paid'\n3. Implement logic to select appropriate credentials from a template based on the product\n4. Create the AccountDelivery record with the credentials\n5. Update the order status to 'completed'\n6. Create a notification for the user about the credential delivery\n7. Add error handling for cases where automatic delivery fails\n8. Implement logging for delivery events",
+            "status": "done",
+            "testStrategy": "Test the webhook with simulated Stripe events to verify automatic credential delivery. Check that orders are properly updated and notifications are created. Verify error handling works correctly."
+          },
+          {
+            "id": 4,
+            "title": "Implement notification read status update",
+            "description": "Add functionality to mark notifications as read when a user views their credentials, improving the user experience by reducing notification clutter.",
+            "dependencies": [
+              "10.2"
+            ],
+            "details": "1. Create an API endpoint at api/notifications/[id]/read that updates a notification's read status\n2. Modify the credential viewing page/component to call this endpoint when credentials are viewed\n3. Update the UI to visually distinguish between read and unread notifications\n4. Add a function to mark all notifications as read\n5. Implement optimistic UI updates for better user experience\n6. Add appropriate authentication checks to ensure users can only mark their own notifications as read",
+            "status": "done",
+            "testStrategy": "Test marking notifications as read through the UI and verify the status updates in the database. Check that only authorized users can mark notifications as read. Verify the UI correctly distinguishes between read and unread notifications."
+          },
+          {
+            "id": 5,
+            "title": "Audit and enhance credential encryption security",
+            "description": "Review and improve the security of the credential encryption system to ensure sensitive account information is properly protected.",
+            "dependencies": [],
+            "details": "1. Review current encryption implementation in the codebase\n2. Ensure proper encryption keys are used and securely stored in environment variables\n3. Implement or improve encryption using a library like crypto-js or node:crypto\n4. Add encryption for credentials when stored in the database\n5. Ensure decryption only happens when needed and with proper authorization\n6. Add rate limiting for credential access endpoints\n7. Implement audit logging for all credential access events\n8. Document the security measures for future reference",
+            "status": "done",
+            "testStrategy": "Test encryption and decryption of credentials with various input types. Verify that encrypted data cannot be easily decoded without the proper keys. Attempt unauthorized access to credentials to ensure security measures are effective."
+          }
+        ]
       },
       {
         "id": 11,
@@ -150,8 +200,78 @@
         "dependencies": [
           7
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "deferred",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up VNPay and Momo developer accounts and SDK installation",
+            "description": "Register developer accounts with both VNPay and Momo payment platforms. Install the necessary SDKs and configure environment variables for API integration.",
+            "dependencies": [],
+            "details": "1. Register developer accounts on VNPay and Momo developer portals\n2. Install required packages: `npm install vnpay-nodejs momo-payment-sdk`\n3. Create a .env.local file with the following variables:\n   - VNPAY_TMN_CODE=your_merchant_code\n   - VNPAY_HASH_SECRET=your_hash_secret\n   - MOMO_PARTNER_CODE=your_partner_code\n   - MOMO_ACCESS_KEY=your_access_key\n   - MOMO_SECRET_KEY=your_secret_key\n   - NEXT_PUBLIC_APP_URL=your_app_url\n4. Create a payment configuration file at lib/payment-config.ts to centralize payment settings",
+            "status": "deferred",
+            "testStrategy": "Verify environment variables are properly loaded and SDKs are correctly installed by creating a simple test script that imports the packages and logs configuration values (with sensitive data masked)."
+          },
+          {
+            "id": 2,
+            "title": "Implement payment method selection UI in checkout",
+            "description": "Create a user interface component that allows users to select between different payment methods (Stripe, VNPay, and Momo) during checkout.",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "1. Create a new component at app/components/checkout/PaymentMethodSelector.tsx\n2. Implement a radio button or card selection UI for payment methods\n3. Add icons and descriptions for each payment method\n4. Create a state to track the selected payment method\n5. Implement onChange handlers to update the selected payment method\n6. Style the component to match the application design\n7. Add conditional rendering based on user location (prioritize VNPay/Momo for Vietnamese users)",
+            "status": "deferred",
+            "testStrategy": "Test the component renders all payment options correctly, selection works properly, and the correct payment method is passed to the parent component. Verify responsive design on different screen sizes."
+          },
+          {
+            "id": 3,
+            "title": "Implement VNPay payment integration",
+            "description": "Create the API routes and client-side functionality to process payments through VNPay, including payment creation and result handling.",
+            "dependencies": [
+              "11.1",
+              "11.2"
+            ],
+            "details": "1. Create the VNPay payment creation API route at app/api/vnpay/create-payment/route.ts using the provided code sample\n2. Implement a client-side function in lib/payment/vnpay.ts to call this API and redirect to the payment URL\n3. Create a payment result handler at app/api/vnpay/payment-return/route.ts to process VNPay's return parameters\n4. Implement signature verification for returned parameters\n5. Add a result page at app/checkout/result/page.tsx to display payment status\n6. Create a utility function to verify payment status with VNPay's API",
+            "status": "deferred",
+            "testStrategy": "Test the payment flow in VNPay's sandbox environment. Verify successful payments are processed correctly. Test handling of canceled payments. Validate signature verification works properly for security."
+          },
+          {
+            "id": 4,
+            "title": "Implement Momo payment integration",
+            "description": "Create the API routes and client-side functionality to process payments through Momo, including payment creation and result handling.",
+            "dependencies": [
+              "11.1",
+              "11.2"
+            ],
+            "details": "1. Create the Momo payment creation API route at app/api/momo/create-payment/route.ts\n2. Implement the following code structure:\n```typescript\nimport { NextRequest, NextResponse } from 'next/server';\nimport MomoPayment from 'momo-payment-sdk';\n\nexport async function POST(request: NextRequest) {\n  const { amount, orderId } = await request.json();\n  \n  const momo = new MomoPayment({\n    partnerCode: process.env.MOMO_PARTNER_CODE,\n    accessKey: process.env.MOMO_ACCESS_KEY,\n    secretKey: process.env.MOMO_SECRET_KEY,\n    redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/result`,\n    ipnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/momo/webhook`,\n  });\n  \n  const paymentData = await momo.createPayment({\n    orderId: orderId,\n    amount: amount,\n    orderInfo: `Payment for order ${orderId}`,\n  });\n  \n  return NextResponse.json({ paymentUrl: paymentData.payUrl });\n}\n```\n3. Create a payment result handler at app/api/momo/payment-return/route.ts\n4. Implement signature verification for returned parameters\n5. Update the result page to handle Momo payment responses",
+            "status": "deferred",
+            "testStrategy": "Test the payment flow in Momo's sandbox environment. Verify successful payments are processed correctly. Test handling of canceled payments. Validate signature verification works properly for security."
+          },
+          {
+            "id": 5,
+            "title": "Implement webhook handlers for payment notifications",
+            "description": "Create webhook endpoints to receive and process asynchronous payment notifications from VNPay and Momo to update order statuses.",
+            "dependencies": [
+              "11.3",
+              "11.4"
+            ],
+            "details": "1. Create a webhook handler for VNPay at app/api/vnpay/webhook/route.ts\n2. Implement signature verification for VNPay notifications\n3. Create a webhook handler for Momo at app/api/momo/webhook/route.ts\n4. Implement signature verification for Momo notifications\n5. Create a shared order update function in lib/orders.ts to update order status based on payment notifications\n6. Implement error handling and logging for webhook processing\n7. Add retry logic for failed order updates",
+            "status": "deferred",
+            "testStrategy": "Test webhook endpoints with sample payloads from VNPay and Momo documentation. Verify order status is correctly updated. Test error handling with invalid signatures. Implement logging to track webhook processing in production."
+          },
+          {
+            "id": 6,
+            "title": "Implement payment status checking and order updates",
+            "description": "Create functionality to check payment status and update orders accordingly, including handling pending, successful, and failed payments.",
+            "dependencies": [
+              "11.3",
+              "11.4",
+              "11.5"
+            ],
+            "details": "1. Create a payment status checking utility at lib/payment/status-checker.ts\n2. Implement functions to check payment status with both VNPay and Momo APIs\n3. Create a background job or API route to periodically check pending payments\n4. Update the order database schema to include payment provider, transaction ID, and payment status\n5. Implement order status updates based on payment status\n6. Create email notifications for payment status changes\n7. Add payment details to the user's order history page\n8. Implement retry logic for failed payments",
+            "status": "deferred",
+            "testStrategy": "Test payment status checking with various payment states. Verify order updates work correctly for different payment outcomes. Test the retry mechanism for failed payments. Validate email notifications are sent correctly."
+          }
+        ]
       },
       {
         "id": 12,
@@ -216,7 +336,7 @@
     ],
     "metadata": {
       "created": "2025-08-05T04:26:40.630Z",
-      "updated": "2025-08-05T09:04:54.354Z",
+      "updated": "2025-08-11T02:58:12.117Z",
       "description": "Tasks for master context"
     }
   }

@@ -23,7 +23,8 @@ async function createTestUser() {
     console.log('👤 Role:', testUser.role)
     
   } catch (error) {
-    if (error.code === 'P2002') {
+    const e = error as any
+    if (e?.code === 'P2002') {
       console.log('ℹ️ Test user already exists')
     } else {
       console.error('❌ Error creating test user:', error)

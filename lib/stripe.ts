@@ -12,7 +12,7 @@ export const getStripe = () => {
 
 // Server-side Stripe instance
 export const stripe = new StripeNode(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-11-20.acacia',
+  apiVersion: '2025-07-30.basil',
   typescript: true,
 })
 

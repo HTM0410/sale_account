@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import PaymentForm from './PaymentForm'
+import { redirectToVnpay } from '@/lib/payment/vnpayClient'
 import { CustomerInfo } from './CheckoutClient'
 
 // Initialize Stripe
@@ -30,6 +31,7 @@ export default function PaymentSection({
   const [paymentIntentId, setPaymentIntentId] = useState<string>('')
   const [isCreatingIntent, setIsCreatingIntent] = useState(true)
   const [error, setError] = useState<string>('')
+  const [method, setMethod] = useState<'stripe' | 'vnpay'>('stripe')
 
   useEffect(() => {
     createPaymentIntent()
@@ -202,15 +204,56 @@ export default function PaymentSection({
         </div>
       </div>
 
-      {/* Stripe Elements */}
-      <Elements stripe={stripePromise} options={stripeOptions}>
-        <PaymentForm
-          paymentIntentId={paymentIntentId}
-          onSuccess={handlePaymentSuccess}
-          onError={handlePaymentError}
-          isLoading={isLoading}
-        />
-      </Elements>
+      {/* Payment Method Selector */}
+      <div className="mb-6">
+        <h3 className="font-medium text-gray-900 mb-2">Phương thức thanh toán</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label className={`border rounded p-3 cursor-pointer flex items-center space-x-3 ${method==='stripe'?'border-blue-500 bg-blue-50':'border-gray-200'}`}>
+            <input type="radio" name="pm" value="stripe" checked={method==='stripe'} onChange={()=>setMethod('stripe')} />
+            <span>Stripe (thẻ quốc tế)</span>
+          </label>
+          <label className={`border rounded p-3 cursor-pointer flex items-center space-x-3 ${method==='vnpay'?'border-blue-500 bg-blue-50':'border-gray-200'}`}>
+            <input type="radio" name="pm" value="vnpay" checked={method==='vnpay'} onChange={()=>setMethod('vnpay')} />
+            <span>VNPay (nội địa)</span>
+          </label>
+        </div>
+      </div>
+
+      {method === 'stripe' ? (
+        <Elements stripe={stripePromise} options={stripeOptions}>
+          <PaymentForm
+            paymentIntentId={paymentIntentId}
+            onSuccess={handlePaymentSuccess}
+            onError={handlePaymentError}
+            isLoading={isLoading}
+          />
+        </Elements>
+      ) : (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600">Bạn sẽ được chuyển đến cổng thanh toán VNPay để hoàn tất giao dịch.</p>
+          <button
+            onClick={async ()=>{
+              try {
+                const cartData = localStorage.getItem('cart-storage')
+                const items = cartData ? (JSON.parse(cartData).state?.items||[]) : []
+                const pendingRes = await fetch('/api/orders/create-pending', {
+                  method: 'POST', headers: {'Content-Type':'application/json'},
+                  body: JSON.stringify({ items, customerInfo, total })
+                })
+                const { orderId } = await pendingRes.json()
+                await redirectToVnpay({ amount: total, orderId })
+              } catch (e) {
+                const msg = e instanceof Error ? e.message : 'Không thể chuyển sang VNPay'
+                setError(msg)
+                onError(msg)
+              }
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Thanh toán với VNPay
+          </button>
+        </div>
+      )}
     </div>
   )
 }
