@@ -7,24 +7,32 @@ interface ProductFiltersProps {
   categories: string[]
   currentCategory?: string
   currentSearch?: string
+  currentMin?: string
+  currentMax?: string
 }
 
 export default function ProductFilters({
   categories,
   currentCategory,
   currentSearch,
+  currentMin,
+  currentMax,
 }: ProductFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [searchValue, setSearchValue] = useState(currentSearch || '')
   const [isPending, startTransition] = useTransition()
+  const [minPrice, setMinPrice] = useState<string>(currentMin || '')
+  const [maxPrice, setMaxPrice] = useState<string>(currentMax || '')
 
-  const updateFilters = useCallback((updates: { category?: string; search?: string; clear?: boolean }) => {
+  const updateFilters = useCallback((updates: { category?: string; search?: string; min?: string; max?: string; clear?: boolean }) => {
     const params = new URLSearchParams(searchParams)
     
     if (updates.clear) {
       params.delete('category')
       params.delete('search')
+      params.delete('min')
+      params.delete('max')
     } else {
       if (updates.category !== undefined) {
         if (updates.category) {
@@ -39,6 +47,22 @@ export default function ProductFilters({
           params.set('search', updates.search)
         } else {
           params.delete('search')
+        }
+      }
+
+      if (updates.min !== undefined) {
+        if (updates.min) {
+          params.set('min', updates.min)
+        } else {
+          params.delete('min')
+        }
+      }
+
+      if (updates.max !== undefined) {
+        if (updates.max) {
+          params.set('max', updates.max)
+        } else {
+          params.delete('max')
         }
       }
     }
@@ -57,12 +81,17 @@ export default function ProductFilters({
     updateFilters({ search: searchValue })
   }
 
+  const handlePriceApply = (e: React.FormEvent) => {
+    e.preventDefault()
+    updateFilters({ min: minPrice, max: maxPrice })
+  }
+
   const clearAllFilters = () => {
     setSearchValue('')
     updateFilters({ clear: true })
   }
 
-  const hasActiveFilters = currentCategory || currentSearch
+  const hasActiveFilters = currentCategory || currentSearch || currentMin || currentMax
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 mt-8">
@@ -114,6 +143,37 @@ export default function ProductFilters({
           ))}
         </div>
 
+        {/* Price Range */}
+        <form onSubmit={handlePriceApply} className="flex items-center gap-2">
+          <span className="text-sm font-medium text-gray-700">Giá:</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            placeholder="Từ"
+            value={minPrice}
+            onChange={(e)=>setMinPrice(e.target.value)}
+            className="w-24 px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          />
+          <span className="text-gray-500">-</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            min={0}
+            placeholder="Đến"
+            value={maxPrice}
+            onChange={(e)=>setMaxPrice(e.target.value)}
+            className="w-24 px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          />
+          <button
+            type="submit"
+            disabled={isPending}
+            className="px-3 py-1.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            Áp dụng
+          </button>
+        </form>
+
         {/* Clear filters */}
         {hasActiveFilters && (
           <button
@@ -156,6 +216,23 @@ export default function ProductFilters({
                     updateFilters({ search: '' })
                   }}
                   className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-green-400 hover:bg-green-200 hover:text-green-500"
+                >
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </span>
+            )}
+            {(currentMin || currentMax) && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                Giá: {currentMin ? `${currentMin}đ` : '0đ'} - {currentMax ? `${currentMax}đ` : '∞'}
+                <button
+                  onClick={() => {
+                    setMinPrice('')
+                    setMaxPrice('')
+                    updateFilters({ min: '', max: '' })
+                  }}
+                  className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-purple-400 hover:bg-purple-200 hover:text-purple-500"
                 >
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />

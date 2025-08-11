@@ -6,6 +6,8 @@ import { Suspense } from 'react'
 interface SearchParams {
   category?: string
   search?: string
+  min?: string
+  max?: string
 }
 
 export default async function ProductsPage({
@@ -27,6 +29,20 @@ export default async function ProductsPage({
       { name: { contains: searchParams.search, mode: 'insensitive' } },
       { description: { contains: searchParams.search, mode: 'insensitive' } },
     ]
+  }
+
+  // Price range filter
+  const AND: any[] = []
+  const min = searchParams.min ? Number(searchParams.min) : undefined
+  const max = searchParams.max ? Number(searchParams.max) : undefined
+  if (!Number.isNaN(min) && min !== undefined) {
+    AND.push({ price: { gte: Math.max(0, Math.floor(min)) } })
+  }
+  if (!Number.isNaN(max) && max !== undefined) {
+    AND.push({ price: { lte: Math.max(0, Math.floor(max)) } })
+  }
+  if (AND.length > 0) {
+    where.AND = AND
   }
 
   // Fetch products from Supabase database
@@ -59,6 +75,8 @@ export default async function ProductsPage({
             categories={categories.map(c => c.category)} 
             currentCategory={searchParams.category}
             currentSearch={searchParams.search}
+            currentMin={searchParams.min}
+            currentMax={searchParams.max}
           />
         </Suspense>
 
