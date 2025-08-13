@@ -7,7 +7,7 @@ Nền tảng thương mại điện tử bán tài khoản premium cho các dị
 - **Frontend:** Next.js 14 (App Router), TypeScript, TailwindCSS
 - **Authentication:** NextAuth.js / Firebase Auth
 - **Payments:** Stripe, VNPay, Momo
-- **Database:** PostgreSQL với Prisma ORM
+- **Database:** Supabase PostgreSQL với Prisma ORM
 - **Localization:** next-i18next (Tiếng Việt)
 
 ## Tính năng chính
@@ -48,6 +48,35 @@ npm start
 ├── lib/                   # Utility functions
 ├── types/                 # TypeScript type definitions
 └── public/                # Static assets
+```
+
+## Database & MCP
+
+### Supabase Configuration
+- **Project ID**: `vbdmsprstoxqgjycbyrv`
+- **Database**: PostgreSQL hosted on Supabase
+- **Real-time**: Server-Sent Events cho notifications
+- **MCP Integration**: Supabase MCP server enabled
+
+### Health Check
+```bash
+# Kiểm tra tình trạng hệ thống
+node scripts/health-check.js
+```
+
+### Database Commands
+```bash
+# Xem database trong Prisma Studio
+npx prisma studio
+
+# Migrate database
+npx prisma migrate dev
+
+# Seed database
+npx prisma db seed
+
+# Reset database
+npx prisma migrate reset
 ```
 
 ## Đóng góp

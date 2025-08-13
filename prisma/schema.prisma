@@ -1,12 +1,9 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -15,132 +12,161 @@ model User {
   email         String    @unique
   password      String?
   name          String?
-  image         String?   // For NextAuth.js
-  emailVerified DateTime? // For NextAuth.js
+  phone         String?
+  address       String?
+  city          String?
+  country       String?
   role          String    @default("user")
   language      String    @default("vi")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
-  // Relations
-  accounts Account[]  // For NextAuth.js
-  sessions Session[]  // For NextAuth.js
-  carts    Cart[]
-  orders   Order[]
-  
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  carts         Cart[]
+  orders        Order[]
+  sessions      Session[]
+  notifications Notification[]
+
   @@map("users")
 }
 
 model Product {
-  id          String @id @default(cuid())
+  id          String           @id @default(cuid())
   name        String
   category    String
   description String
-  price       Float
+  price       Float            // Giá cũ, sẽ deprecated - dùng packages thay thế
   stock       Int
-  imageUrl    String @map("image_url")
-  isActive    Boolean @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
+  imageUrl    String           @map("image_url")
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   cartItems   CartItem[]
   orderItems  OrderItem[]
-  
+  packages    ProductPackage[]
+
   @@map("products")
 }
 
+model ProductPackage {
+  id          String     @id @default(cuid())
+  productId   String     @map("product_id")
+  duration    Int        // Số tháng (1, 3, 6, 12...)
+  price       Float      // Giá tiền cho gói này
+  description String?    // Mô tả gói (VIP, Premium, Basic...)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  product     Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+
+  @@unique([productId, duration]) // Mỗi sản phẩm chỉ có 1 gói cho mỗi thời hạn
+  @@map("product_packages")
+}
+
 model Cart {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relations
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String     @id @default(cuid())
+  userId    String     @map("user_id")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   items     CartItem[]
-  
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("carts")
 }
 
 model CartItem {
-  id        String @id @default(cuid())
-  cartId    String @map("cart_id")
-  productId String @map("product_id")
-  quantity  Int    @default(1)
-  createdAt DateTime @default(now())
-  
-  // Relations
-  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
-  @@unique([cartId, productId])
+  id               String          @id @default(cuid())
+  cartId           String          @map("cart_id")
+  productId        String          @map("product_id")        // Kept for backward compatibility
+  productPackageId String?         @map("product_package_id") // New: specific package
+  quantity         Int             @default(1)
+  createdAt        DateTime        @default(now())
+  cart             Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productPackage   ProductPackage? @relation(fields: [productPackageId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId, productPackageId])
   @@map("cart_items")
 }
 
 model Order {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  total     Float
-  status    String   @default("pending") // pending, paid, completed, cancelled
-  paidAt    DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relations
-  user            User             @relation(fields: [userId], references: [id])
-  items           OrderItem[]
+  id              String           @id @default(cuid())
+  userId          String           @map("user_id")
+  total           Float
+  status          String           @default("pending")
+  paidAt          DateTime?
+  metadata        Json?            // Store additional order information
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   accountDelivery AccountDelivery?
-  
+  items           OrderItem[]
+  user            User             @relation(fields: [userId], references: [id])
+
   @@map("orders")
 }
 
 model OrderItem {
-  id        String @id @default(cuid())
-  orderId   String @map("order_id")
-  productId String @map("product_id")
-  quantity  Int    @default(1)
-  price     Float  // Price at time of order
-  
-  // Relations
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id])
-  
+  id               String          @id @default(cuid())
+  orderId          String          @map("order_id")
+  productId        String          @map("product_id")        // Kept for backward compatibility
+  productPackageId String?         @map("product_package_id") // New: specific package
+  quantity         Int             @default(1)
+  price            Float           // Price at time of order
+  duration         Int?            // Duration in months (for display)
+  metadata         Json?           // Store additional item information
+  order            Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product          Product         @relation(fields: [productId], references: [id])
+  productPackage   ProductPackage? @relation(fields: [productPackageId], references: [id])
+
   @@map("order_items")
 }
 
 model AccountDelivery {
   id             String    @id @default(cuid())
   orderId        String    @unique @map("order_id")
-  credentials    String    // Encrypted account credentials
-  deliveryStatus String    @default("pending") // pending, delivered
+  credentials    String
+  deliveryStatus String    @default("pending")
   deliveryNotes  String?   @map("delivery_notes")
   sentAt         DateTime?
   createdAt      DateTime  @default(now())
-  
-  // Relations
   order          Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
+
   @@map("account_deliveries")
 }
 
-// NextAuth.js models
+// Notifications used across the app (referenced in code)
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  type      String
+  message   String
+  metadata  Json?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String  @map("user_id")
   type              String
   provider          String
   providerAccountId String  @map("provider_account_id")
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
@@ -150,9 +176,8 @@ model Session {
   sessionToken String   @unique @map("session_token")
   userId       String   @map("user_id")
   expires      DateTime
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("sessions")
 }
 
@@ -160,7 +185,7 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
-  
+
   @@unique([identifier, token])
   @@map("verification_tokens")
 }
