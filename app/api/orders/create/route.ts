@@ -74,10 +74,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(existingOrder)
     }
 
+    // Find user by email to get the correct user ID
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email! }
+    })
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
     // Create order in database
     const order = await prisma.order.create({
       data: {
-        userId: session.user.id || session.user.email || '',
+        userId: user.id,
         total: total,
         status: 'paid',
         paidAt: new Date(),

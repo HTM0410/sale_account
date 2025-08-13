@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { requireRole, getCurrentUser } from '@/lib/permissions'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import { Metadata } from 'next'
 
@@ -17,25 +17,16 @@ export default async function AdminLayout({
 }) {
   // Check authentication
   const session = await getServerSession(authOptions)
-  
+
   if (!session) {
     redirect('/signin?callbackUrl=/admin')
   }
 
-  // Check user role in database
-  const user = await prisma.user.findUnique({
-    where: {
-      id: session.user.id || session.user.email || ''
-    },
-    select: {
-      role: true,
-      name: true,
-      email: true,
-    }
-  })
-
-  // Redirect if not admin
-  if (!user || user.role !== 'admin') {
+  // Check user role using permissions system
+  let user
+  try {
+    user = await requireRole(['ADMIN', 'STAFF'])
+  } catch (error) {
     redirect('/dashboard?error=access_denied')
   }
 

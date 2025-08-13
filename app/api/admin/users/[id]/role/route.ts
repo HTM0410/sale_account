@@ -24,7 +24,7 @@ export async function PATCH(
       select: { role: true }
     })
 
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }
@@ -35,7 +35,7 @@ export async function PATCH(
     const { role } = await request.json()
 
     // Validate role
-    if (!['user', 'admin'].includes(role)) {
+    if (!['CUSTOMER', 'STAFF', 'ADMIN'].includes(role)) {
       return NextResponse.json(
         { error: 'Vai trò không hợp lệ' },
         { status: 400 }
@@ -55,7 +55,7 @@ export async function PATCH(
     }
 
     // Prevent self-role modification to non-admin
-    if (targetUser.id === session.user.id && role !== 'admin') {
+    if (targetUser.id === session.user.id && role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'Không thể thay đổi vai trò của chính mình' },
         { status: 400 }
@@ -68,9 +68,18 @@ export async function PATCH(
       data: { role }
     })
 
+    const getRoleText = (role: string) => {
+      switch (role) {
+        case 'ADMIN': return 'quản trị viên'
+        case 'STAFF': return 'nhân viên'
+        case 'CUSTOMER': return 'khách hàng'
+        default: return role
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      message: `Vai trò người dùng đã được cập nhật thành ${role === 'admin' ? 'quản trị viên' : 'người dùng'}`,
+      message: `Vai trò người dùng đã được cập nhật thành ${getRoleText(role)}`,
       user: {
         id: updatedUser.id,
         email: updatedUser.email,

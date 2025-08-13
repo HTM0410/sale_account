@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import SessionProvider from '@/components/providers/SessionProvider'
+import NotificationProvider from '@/components/providers/NotificationProvider'
+import AnalyticsProvider from '@/components/providers/AnalyticsProvider'
 import Header from '@/components/Header'
 
 export const metadata: Metadata = {
@@ -18,11 +20,15 @@ export default function RootLayout({
     <html lang="vi">
       <body className="min-h-screen">
         <SessionProvider>
-          <Header />
-          
-          <main className="flex-1">
-            {children}
-          </main>
+          <AnalyticsProvider>
+            <NotificationProvider>
+              <Header />
+
+              <main className="flex-1">
+                {children}
+              </main>
+            </NotificationProvider>
+          </AnalyticsProvider>
           
           <footer className="bg-gray-800 text-white">
             <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">

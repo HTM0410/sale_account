@@ -3,6 +3,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import { useCartStore } from '@/lib/stores/cartStore'
 import Link from 'next/link'
+import NotificationBell from './NotificationBell'
 
 export default function Header() {
   const { data: session, status } = useSession()
@@ -37,8 +38,11 @@ export default function Header() {
                 Sản phẩm
               </Link>
               
+              {/* Notifications */}
+              {session && <NotificationBell />}
+
               {/* Cart Icon */}
-              <Link 
+              <Link
                 href="/cart"
                 className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium relative"
               >
@@ -64,7 +68,7 @@ export default function Header() {
                   <span className="text-sm text-gray-700">
                     Xin chào, {session.user.name || session.user.email}
                   </span>
-                  {session.user.role === 'admin' && (
+                  {session.user.role === 'ADMIN' && (
                     <Link
                       href="/admin"
                       className="text-purple-600 hover:text-purple-700 px-3 py-2 rounded-md text-sm font-medium"

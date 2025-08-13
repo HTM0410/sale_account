@@ -15,9 +15,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
     }
 
+    // Find user by email to get the correct user ID
+    console.log('Session user email:', session.user.email)
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email! }
+    })
+
+    console.log('Found user:', user ? user.id : 'null')
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
     const order = await prisma.order.create({
       data: {
-        userId: session.user.id || session.user.email || '',
+        userId: user.id,
         total: Math.round(total || 0),
         status: 'pending',
         metadata: {

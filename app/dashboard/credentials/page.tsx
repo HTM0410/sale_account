@@ -17,10 +17,19 @@ export default async function CredentialsPage() {
     redirect('/signin?callbackUrl=/dashboard/credentials')
   }
 
+  // Find user by email to get the correct user ID
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email! }
+  })
+
+  if (!user) {
+    redirect('/signin?callbackUrl=/dashboard/credentials')
+  }
+
   // Fetch user orders with delivered account credentials
   const orders = await prisma.order.findMany({
-    where: { 
-      userId: session.user.id || session.user.email || '',
+    where: {
+      userId: user.id,
       status: 'paid',
       accountDelivery: {
         deliveryStatus: 'delivered'

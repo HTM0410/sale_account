@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { getCurrentUser } from '@/lib/permissions'
 
 export async function PUT(request: NextRequest) {
   try {
@@ -82,22 +83,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get user profile
-    const user = await prisma.user.findUnique({
-      where: {
-        id: session.user.id || session.user.email || ''
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        address: true,
-        city: true,
-        country: true,
-        createdAt: true,
-      }
-    })
+    // Get user profile using permissions system
+    const user = await getCurrentUser()
 
     if (!user) {
       return NextResponse.json(
@@ -106,9 +93,32 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Get full user details
+    const fullUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        address: true,
+        city: true,
+        country: true,
+        role: true,
+        createdAt: true,
+      }
+    })
+
+    if (!fullUser) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
+
     return NextResponse.json({
       success: true,
-      user
+      user: fullUser
     })
 
   } catch (error) {

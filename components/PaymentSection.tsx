@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements } from '@stripe/react-stripe-js'
 import PaymentForm from './PaymentForm'
+import PaymentMethodSelector, { PaymentMethod } from './PaymentMethodSelector'
 import { redirectToVnpay } from '@/lib/payment/vnpayClient'
 import { CustomerInfo } from './CheckoutClient'
 
@@ -31,7 +32,8 @@ export default function PaymentSection({
   const [paymentIntentId, setPaymentIntentId] = useState<string>('')
   const [isCreatingIntent, setIsCreatingIntent] = useState(true)
   const [error, setError] = useState<string>('')
-  const [method, setMethod] = useState<'stripe' | 'vnpay'>('stripe')
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('stripe')
+  const [orderId, setOrderId] = useState<string>('')
 
   useEffect(() => {
     createPaymentIntent()
@@ -90,6 +92,14 @@ export default function PaymentSection({
   const handlePaymentError = (error: string) => {
     onError(error)
   }
+
+
+
+
+
+
+
+
 
   if (error) {
     return (
@@ -206,20 +216,15 @@ export default function PaymentSection({
 
       {/* Payment Method Selector */}
       <div className="mb-6">
-        <h3 className="font-medium text-gray-900 mb-2">Phương thức thanh toán</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label className={`border rounded p-3 cursor-pointer flex items-center space-x-3 ${method==='stripe'?'border-blue-500 bg-blue-50':'border-gray-200'}`}>
-            <input type="radio" name="pm" value="stripe" checked={method==='stripe'} onChange={()=>setMethod('stripe')} />
-            <span>Stripe (thẻ quốc tế)</span>
-          </label>
-          <label className={`border rounded p-3 cursor-pointer flex items-center space-x-3 ${method==='vnpay'?'border-blue-500 bg-blue-50':'border-gray-200'}`}>
-            <input type="radio" name="pm" value="vnpay" checked={method==='vnpay'} onChange={()=>setMethod('vnpay')} />
-            <span>VNPay (nội địa)</span>
-          </label>
-        </div>
+        <PaymentMethodSelector
+          selectedMethod={paymentMethod}
+          onMethodChange={setPaymentMethod}
+          disabled={isLoading}
+        />
       </div>
 
-      {method === 'stripe' ? (
+      {/* Payment Form based on selected method */}
+      {paymentMethod === 'stripe' ? (
         <Elements stripe={stripePromise} options={stripeOptions}>
           <PaymentForm
             paymentIntentId={paymentIntentId}
@@ -229,28 +234,82 @@ export default function PaymentSection({
           />
         </Elements>
       ) : (
-        <div className="space-y-3">
-          <p className="text-sm text-gray-600">Bạn sẽ được chuyển đến cổng thanh toán VNPay để hoàn tất giao dịch.</p>
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            {paymentMethod === 'vnpay'
+              ? 'Bạn sẽ được chuyển đến cổng thanh toán VNPay để hoàn tất giao dịch.'
+              : 'Bạn sẽ được chuyển đến ví MoMo để hoàn tất giao dịch.'
+            }
+          </p>
           <button
-            onClick={async ()=>{
+            onClick={async () => {
               try {
+                // Create pending order first
                 const cartData = localStorage.getItem('cart-storage')
-                const items = cartData ? (JSON.parse(cartData).state?.items||[]) : []
+                const items = cartData ? (JSON.parse(cartData).state?.items || []) : []
+
                 const pendingRes = await fetch('/api/orders/create-pending', {
-                  method: 'POST', headers: {'Content-Type':'application/json'},
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ items, customerInfo, total })
                 })
-                const { orderId } = await pendingRes.json()
-                await redirectToVnpay({ amount: total, orderId })
+
+                if (!pendingRes.ok) {
+                  throw new Error('Không thể tạo đơn hàng')
+                }
+
+                const { orderId: newOrderId } = await pendingRes.json()
+                setOrderId(newOrderId)
+
+                // Redirect to payment gateway
+                if (paymentMethod === 'vnpay') {
+                  // Call VNPay payment with the new orderId
+                  const vnpayResponse = await fetch('/api/vnpay/create-payment', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ orderId: newOrderId }),
+                  })
+
+                  const vnpayData = await vnpayResponse.json()
+
+                  if (vnpayData.success && vnpayData.paymentUrl) {
+                    window.location.href = vnpayData.paymentUrl
+                  } else {
+                    throw new Error(vnpayData.error || 'Không thể tạo thanh toán VNPay')
+                  }
+                } else if (paymentMethod === 'momo') {
+                  // Call Momo payment with the new orderId
+                  const momoResponse = await fetch('/api/momo/create-payment', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ orderId: newOrderId }),
+                  })
+
+                  const momoData = await momoResponse.json()
+
+                  if (momoData.success && momoData.paymentUrl) {
+                    window.location.href = momoData.paymentUrl
+                  } else {
+                    throw new Error(momoData.error || 'Không thể tạo thanh toán Momo')
+                  }
+                }
               } catch (e) {
-                const msg = e instanceof Error ? e.message : 'Không thể chuyển sang VNPay'
+                const msg = e instanceof Error ? e.message : 'Không thể khởi tạo thanh toán'
                 setError(msg)
                 onError(msg)
               }
             }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            disabled={isLoading}
+            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
-            Thanh toán với VNPay
+            {isLoading
+              ? 'Đang xử lý...'
+              : `Thanh toán với ${paymentMethod === 'vnpay' ? 'VNPay' : 'MoMo'}`
+            }
           </button>
         </div>
       )}

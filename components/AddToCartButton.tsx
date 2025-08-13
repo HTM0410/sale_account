@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ProductPackage } from '@prisma/client'
 import { useCartStore, createCartItem } from '@/lib/stores/cartStore'
+import { trackAddToCart, createItemData } from '@/lib/analytics'
 
 interface AddToCartButtonProps {
   productId: string
@@ -50,7 +51,15 @@ export default function AddToCartButton({
 
       // Add to cart store
       addItem(cartItem)
-      
+
+      // Track analytics event
+      const itemData = createItemData(
+        { id: productId, name: productName, category: 'premium_account', price: productPrice },
+        quantity,
+        selectedPackage
+      )
+      trackAddToCart('VND', (selectedPackage?.price || productPrice) * quantity, [itemData])
+
       setIsAdded(true)
       setTimeout(() => setIsAdded(false), 2000) // Reset after 2 seconds
     } catch (error) {

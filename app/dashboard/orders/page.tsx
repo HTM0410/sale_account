@@ -17,10 +17,19 @@ export default async function OrdersPage() {
     redirect('/signin?callbackUrl=/dashboard/orders')
   }
 
+  // Find user by email to get the correct user ID
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email! }
+  })
+
+  if (!user) {
+    redirect('/signin?callbackUrl=/dashboard/orders')
+  }
+
   // Fetch user orders with related data
   const orders = await prisma.order.findMany({
-    where: { 
-      userId: session.user.id || session.user.email || ''
+    where: {
+      userId: user.id
     },
     include: {
       items: {

@@ -48,9 +48,11 @@ export default function UsersTable({
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin':
+      case 'ADMIN':
         return 'bg-red-100 text-red-800'
-      case 'user':
+      case 'STAFF':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'CUSTOMER':
         return 'bg-blue-100 text-blue-800'
       default:
         return 'bg-gray-100 text-gray-800'
@@ -59,10 +61,12 @@ export default function UsersTable({
 
   const getRoleText = (role: string) => {
     switch (role) {
-      case 'admin':
+      case 'ADMIN':
         return 'Quản trị viên'
-      case 'user':
-        return 'Người dùng'
+      case 'STAFF':
+        return 'Nhân viên'
+      case 'CUSTOMER':
+        return 'Khách hàng'
       default:
         return role
     }
@@ -80,7 +84,7 @@ export default function UsersTable({
   }
 
   const handleRoleUpdate = async (userId: string, newRole: string) => {
-    if (newRole === 'admin') {
+    if (newRole === 'ADMIN') {
       const confirmed = confirm(
         'Bạn có chắc chắn muốn cấp quyền quản trị cho người dùng này? ' +
         'Họ sẽ có quyền truy cập vào tất cả chức năng admin.'
@@ -211,8 +215,9 @@ export default function UsersTable({
                       disabled={updatingRole === user.id}
                       className={`text-xs font-medium px-2.5 py-0.5 rounded-full border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 ${getRoleColor(user.role)}`}
                     >
-                      <option value="user">Người dùng</option>
-                      <option value="admin">Quản trị viên</option>
+                      <option value="CUSTOMER">Khách hàng</option>
+                      <option value="STAFF">Nhân viên</option>
+                      <option value="ADMIN">Quản trị viên</option>
                     </select>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

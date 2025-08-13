@@ -26,8 +26,9 @@ export default function UsersHeader({ totalCount, roleCounts, searchParams }: Us
 
   const roleOptions = [
     { value: 'all', label: 'Tất cả vai trò', count: totalCount },
-    { value: 'user', label: 'Người dùng', count: roleCounts.user || 0 },
-    { value: 'admin', label: 'Quản trị viên', count: roleCounts.admin || 0 },
+    { value: 'CUSTOMER', label: 'Khách hàng', count: roleCounts.CUSTOMER || 0 },
+    { value: 'STAFF', label: 'Nhân viên', count: roleCounts.STAFF || 0 },
+    { value: 'ADMIN', label: 'Quản trị viên', count: roleCounts.ADMIN || 0 },
   ]
 
   const handleFilterChange = (filterType: string, value: string) => {
@@ -94,13 +95,13 @@ export default function UsersHeader({ totalCount, roleCounts, searchParams }: Us
       </div>
 
       {/* Role Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {roleOptions.map((option) => (
           <div
             key={option.value}
             className={`bg-white rounded-lg shadow-sm border-2 p-6 cursor-pointer transition-colors ${
-              role === option.value 
-                ? 'border-blue-500 bg-blue-50' 
+              role === option.value
+                ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
             onClick={() => {
@@ -111,14 +112,19 @@ export default function UsersHeader({ totalCount, roleCounts, searchParams }: Us
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                  option.value === 'admin' ? 'bg-red-100' : 
-                  option.value === 'user' ? 'bg-blue-100' : 'bg-gray-100'
+                  option.value === 'ADMIN' ? 'bg-red-100' :
+                  option.value === 'STAFF' ? 'bg-yellow-100' :
+                  option.value === 'CUSTOMER' ? 'bg-blue-100' : 'bg-gray-100'
                 }`}>
-                  {option.value === 'admin' ? (
+                  {option.value === 'ADMIN' ? (
                     <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                  ) : option.value === 'user' ? (
+                  ) : option.value === 'STAFF' ? (
+                    <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  ) : option.value === 'CUSTOMER' ? (
                     <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>

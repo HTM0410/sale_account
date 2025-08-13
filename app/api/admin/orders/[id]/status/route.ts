@@ -24,7 +24,7 @@ export async function PATCH(
       select: { role: true }
     })
 
-    if (!user || user.role !== 'admin') {
+    if (!user || !['ADMIN', 'STAFF'].includes(user.role)) {
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }
