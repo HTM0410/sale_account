@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+
+export const dynamic = 'force-dynamic'
 import { verifyVnpayReturn } from '@/lib/payment/vnpay'
 import { prisma } from '@/lib/db'
 

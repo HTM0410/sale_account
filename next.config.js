@@ -4,9 +4,9 @@ const nextConfig = {
   poweredByHeader: false,
   output: 'standalone',
 
-  // Disable static optimization for all pages
+  // Experimental features
   experimental: {
-    appDir: true,
+    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs'],
   },
 
   // Image optimization
