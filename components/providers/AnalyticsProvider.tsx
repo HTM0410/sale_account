@@ -158,7 +158,8 @@ export default function AnalyticsProvider({ children }: AnalyticsProviderProps) 
 
   return (
     <ErrorBoundary>
-      <GoogleAnalytics />
+      {/* Temporarily disabled GoogleAnalytics for deployment */}
+      {/* <GoogleAnalytics /> */}
       {children}
     </ErrorBoundary>
   )
