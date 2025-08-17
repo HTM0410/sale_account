@@ -16,7 +16,7 @@
     "db:studio": "prisma studio",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
-    "postbuild": "next-sitemap",
+    "postbuild": "prisma generate && next-sitemap",
     "deploy:staging": "vercel --target staging",
     "deploy:production": "vercel --prod",
     "changeset": "changeset",
