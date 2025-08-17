@@ -149,9 +149,9 @@ export default async function AdminAnalyticsPage() {
     },
     recentOrders,
     popularProducts,
-    userGrowth,
-    revenueByMonth,
-    ordersByPaymentMethod
+    userGrowth: userGrowth as Array<{ month: Date; count: bigint }>,
+    revenueByMonth: revenueByMonth as Array<{ month: Date; revenue: number }>,
+    ordersByPaymentMethod: ordersByPaymentMethod as Array<{ payment_method: string; count: bigint }>
   }
 
   return (
