@@ -3,7 +3,8 @@
 import { useCartStore } from '@/lib/stores/cartStore'
 import Link from 'next/link'
 import CartItem from '@/components/CartItem'
-import { Metadata } from 'next'
+
+export const dynamic = 'force-dynamic'
 
 export default function CartPage() {
   const { items, totalItems, totalPrice, clearCart } = useCartStore()

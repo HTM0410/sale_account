@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         metadata: {
           path: ['paymentIntentId'],
           equals: paymentIntentId
-        }
+        } as any
       }
     })
 

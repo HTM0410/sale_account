@@ -6,6 +6,8 @@ import AdminStatsGrid from '@/components/admin/AdminStatsGrid'
 import RecentOrdersTable from '@/components/admin/RecentOrdersTable'
 import { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Admin Dashboard - Tổng quan',
   description: 'Tổng quan hệ thống marketplace',

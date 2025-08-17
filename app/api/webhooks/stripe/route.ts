@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
               metadata: {
                 path: ['paymentIntentId'],
                 equals: paymentIntent.id
-              },
+              } as any as any,
               status: 'pending'
             },
             data: {
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
               metadata: {
                 path: ['paymentIntentId'],
                 equals: paymentIntent.id
-              }
+              } as any
             },
             include: {
               user: {
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
               metadata: {
                 path: ['paymentIntentId'],
                 equals: paymentIntent.id
-              }
+              } as any
             },
             data: {
               status: 'failed'

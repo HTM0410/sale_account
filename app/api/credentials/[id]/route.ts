@@ -82,7 +82,7 @@ export async function GET(
           metadata: {
             path: ['orderId'],
             equals: delivery.orderId
-          },
+          } as any,
           isRead: false
         },
         data: {

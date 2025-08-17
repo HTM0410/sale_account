@@ -75,8 +75,8 @@ export async function POST(request: NextRequest) {
         })
 
         // Send real-time notification
-        const { sendNotificationToUser } = await import('../../notifications/stream/route')
-        await sendNotificationToUser(order.userId, notification)
+        // const { sendNotificationToUser } = await import('../../notifications/stream/route')
+        // await sendNotificationToUser(order.userId, notification)
       } catch (notificationError) {
         console.error('Failed to create payment success notification:', notificationError)
       }
@@ -118,8 +118,8 @@ export async function POST(request: NextRequest) {
         })
 
         // Send real-time notification
-        const { sendNotificationToUser } = await import('../../notifications/stream/route')
-        await sendNotificationToUser(order.userId, notification)
+        // const { sendNotificationToUser } = await import('../../notifications/stream/route')
+        // await sendNotificationToUser(order.userId, notification)
       } catch (notificationError) {
         console.error('Failed to create payment failed notification:', notificationError)
       }

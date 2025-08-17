@@ -34,7 +34,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
     // Track error in Sentry with context
     Sentry.withScope((scope) => {
       scope.setTag('errorBoundary', true)
-      scope.setContext('errorInfo', errorInfo)
+      scope.setContext('errorInfo', errorInfo as any)
       scope.setLevel('error')
       Sentry.captureException(error)
     })

@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 // import { UserRole } from '@prisma/client'
-type UserRole = 'USER' | 'ADMIN' | 'STAFF' | 'CUSTOMER'
+type UserRole = 'ADMIN' | 'STAFF' | 'CUSTOMER'
 
 export type Permission = 
   | 'read:products'
@@ -39,19 +39,6 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'write:settings',
     'access:admin',
     'access:staff',
-  ],
-  STAFF: [
-    'read:products',
-    'write:products',
-    'read:orders',
-    'write:orders',
-    'read:users',
-    'read:analytics',
-    'access:staff',
-  ],
-  USER: [
-    'read:products',
-    'read:orders', // Only their own orders
   ],
   STAFF: [
     'read:products',

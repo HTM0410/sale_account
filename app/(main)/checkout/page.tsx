@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth'
 import CheckoutClient from '@/components/CheckoutClient'
 import { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Thanh toán - Premium Account Marketplace',
   description: 'Hoàn tất đơn hàng và thanh toán an toàn',

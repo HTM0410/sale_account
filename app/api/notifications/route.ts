@@ -135,8 +135,8 @@ export async function POST(request: NextRequest) {
     })
 
     // Send real-time notification
-    const { sendNotificationToUser } = await import('./stream/route')
-    await sendNotificationToUser(userId, notification)
+            // const { sendNotificationToUser } = await import('./stream/route')
+        // await sendNotificationToUser(userId, notification)
 
     return NextResponse.json({
       success: true,
