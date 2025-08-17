@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 // import { UserRole } from '@prisma/client'
-type UserRole = 'USER' | 'ADMIN'
+type UserRole = 'USER' | 'ADMIN' | 'STAFF' | 'CUSTOMER'
 
 export type Permission = 
   | 'read:products'
@@ -49,6 +49,19 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'read:analytics',
     'access:staff',
   ],
+  USER: [
+    'read:products',
+    'read:orders', // Only their own orders
+  ],
+  STAFF: [
+    'read:products',
+    'write:products',
+    'read:orders',
+    'write:orders',
+    'read:users',
+    'read:analytics',
+    'access:staff',
+  ],
   CUSTOMER: [
     'read:products',
     'read:orders', // Only their own orders
@@ -80,7 +93,7 @@ export async function hasPermission(permission: Permission): Promise<boolean> {
     return false
   }
 
-  const userPermissions = ROLE_PERMISSIONS[user.role] || []
+  const userPermissions = ROLE_PERMISSIONS[user.role as UserRole] || []
   return userPermissions.includes(permission)
 }
 
@@ -98,7 +111,7 @@ export async function requireRole(role: UserRole | UserRole[]) {
   }
 
   const allowedRoles = Array.isArray(role) ? role : [role]
-  if (!allowedRoles.includes(user.role)) {
+  if (!allowedRoles.includes(user.role as UserRole)) {
     throw new Error(`Access denied. Required role: ${allowedRoles.join(' or ')}`)
   }
 
@@ -138,7 +151,7 @@ export function withAuth<T extends Record<string, any>>(
           ? options.requireRole 
           : [options.requireRole]
         
-        if (!allowedRoles.includes(user.role)) {
+        if (!allowedRoles.includes(user.role as UserRole)) {
           throw new Error(`Access denied. Required role: ${allowedRoles.join(' or ')}`)
         }
       }

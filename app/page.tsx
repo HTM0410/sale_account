@@ -1,5 +1,7 @@
 import { ArrowRightIcon, ShieldCheckIcon, CurrencyDollarIcon, ClockIcon } from '@heroicons/react/24/outline'
 
+export const dynamic = 'force-dynamic'
+
 export default function HomePage() {
   return (
     <div className="bg-white">

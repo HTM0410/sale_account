@@ -5,6 +5,8 @@ import Pagination from '@/components/Pagination'
 import ProductsGridSkeleton from '@/components/ProductsGridSkeleton'
 import { Suspense } from 'react'
 
+export const dynamic = 'force-dynamic'
+
 interface SearchParams {
   category?: string
   search?: string
