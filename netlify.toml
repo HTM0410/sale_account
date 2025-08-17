@@ -32,9 +32,8 @@
     w = ":width"
     q = ":quality"
 
-# Catch-all redirect for SPA routing
+# Catch-all redirect for SPA routing  
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  conditions = {Role = ["admin", "user"]}
